@@ -1,19 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Diagnostics;
 using System.Drawing;
-using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Windows.Forms.VisualStyles;
 using System.IO;
 using System.Windows.Forms.DataVisualization.Charting;
 using System.Security.Cryptography;
+using System.Net.Http;
+using System.Net.Http.Headers;
 
 namespace ControlSystem
 {
@@ -26,12 +23,9 @@ namespace ControlSystem
 
         Font font1 = new Font(FontFamily.GenericSerif, 14);
 
-        DataBase workBase = new DataBase();
-
         private void Form1_Load(object sender, EventArgs e)
         {
             //подключаемся к БД
-            workBase.connect("");
             //запуск модуля аутентификации
             autentification(false);
 
@@ -68,7 +62,7 @@ namespace ControlSystem
 
         //основной метод аутентификации, принимает на вход указатель того, что
         //происходит регистрация или аутентификация
-        private void autentification(bool registr)
+        private async void autentification(bool registr)
         {
             //закрытие доступа к функциям КЧ АОС
             файлToolStripMenuItem.Enabled = false;
@@ -113,10 +107,16 @@ namespace ControlSystem
 
             autentForm.Show();
 
-            workBase.createDatabase();
+            //workBase.createDatabase();
 
             //проверка на то, сколько существует пользователей
-            DataTable dt = workBase.sql("SELECT u.id_user FROM t_user u");
+            var client = new HttpClient();
+            client.BaseAddress = new Uri("http://localhost:53363/");
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Accept.Add(
+                new MediaTypeWithQualityHeaderValue("application/json"));
+            var response = await client.GetAsync("api/user");
+            //DataTable dt = workBase.sql("SELECT u.id_user FROM t_user u");
             if (dt.Rows.Count == 0)
             {
                 MessageBox.Show(

@@ -1,23 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using MySql.Data.MySqlClient;
 using System.Data;
 using System.Windows.Forms;
+using System.Data.SqlClient;
 
 namespace ControlSystem
 {
     public class DataBase
     {
-        public MySqlConnection connectionMySQL;
+        public SqlConnection connectionSql;
         //адаптер, служит для выполнения SQL-запросов
-        public MySqlDataAdapter adapterMySQL;
+        public SqlDataAdapter adapterSql;
 
         //конструктор класса
         public DataBase() 
         {
-            connectionMySQL = new MySqlConnection();
-            adapterMySQL = null;
+            connectionSql = new SqlConnection();
+            adapterSql = null;
         }
 
         //метод осуществляет подключение к базе данных
@@ -27,10 +27,10 @@ namespace ControlSystem
             {
                 //считываем файл с настройками подключения
                 string str = File.ReadAllText(System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory.ToString(), "config.cfg"));
-                connectionMySQL.ConnectionString = str;
-
+                connectionSql.ConnectionString = str;
+                
                 //подключаемся к базе
-                connectionMySQL.Open();
+                connectionSql.Open();
             }
             catch (Exception exp)
             {
@@ -44,15 +44,15 @@ namespace ControlSystem
         {
             DataSet DataSetDB = new DataSet();
             
-            adapterMySQL = new MySqlDataAdapter("Select * from " + tableName, connectionMySQL);
+            adapterSql = new SqlDataAdapter("Select * from " + tableName, connectionSql);
             
-            adapterMySQL.MissingSchemaAction = MissingSchemaAction.AddWithKey;
+            adapterSql.MissingSchemaAction = MissingSchemaAction.AddWithKey;
             
-            MySqlCommandBuilder bulder = new MySqlCommandBuilder(adapterMySQL);
-            adapterMySQL.InsertCommand = bulder.GetInsertCommand();
-            adapterMySQL.Fill(DataSetDB);
+            SqlCommandBuilder bulder = new SqlCommandBuilder(adapterSql);
+            adapterSql.InsertCommand = bulder.GetInsertCommand();
+            adapterSql.Fill(DataSetDB);
             
-            adapterMySQL.Update(DataSetDB.Tables[0]);
+            adapterSql.Update(DataSetDB.Tables[0]);
 
             return DataSetDB.Tables[0];
         }
@@ -60,7 +60,7 @@ namespace ControlSystem
         //метод осуществляющий прерывание соединения с БД
         public void connectionClose()
         {
-            connectionMySQL.Close();
+            connectionSql.Close();
         }
 
         //метод возвращающий список названий столбцов указанной таблицы
@@ -86,8 +86,8 @@ namespace ControlSystem
                 //результирующая таблица
                 DataTable dt = new DataTable();
                 //выполняем запрос и записывем результат
-                adapterMySQL = new MySqlDataAdapter(textSql, connectionMySQL);
-                adapterMySQL.Fill(dt);
+                adapterSql = new SqlDataAdapter(textSql, connectionSql);
+                adapterSql.Fill(dt);
                 return dt;
             }
             catch (Exception exp)
@@ -239,23 +239,31 @@ namespace ControlSystem
         public void createDatabase()
         {
             //создание если таблицы с пользователями, если она не существует
-            sql("CREATE TABLE IF NOT EXISTS t_user (id_user int AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255), password VARCHAR(255), role VARCHAR(1));");
+            sql(@"IF NOT EXISTS ( select * from sysobjects where name='t_user')
+CREATE TABLE  t_user(id_user uniqueidentifier Primary KEY, name NVARCHAR(255), password NVARCHAR(255), role NVARCHAR(1))");
 
             //Создаем таблицу "курс" если она не существует
-            sql("CREATE TABLE IF NOT EXISTS course (id_course int AUTO_INCREMENT PRIMARY KEY, name VARCHAR(50));");
+            sql(@"IF NOT EXISTS ( select * from sysobjects where name='course') CREATE TABLE 
+course (id_course uniqueidentifier PRIMARY KEY, name NVARCHAR(50));");
 
             //создаем таблицу "тема", если она не существует
-            sql("CREATE TABLE IF NOT EXISTS topic (id_topic int AUTO_INCREMENT PRIMARY KEY, name VARCHAR(50), time int, id_course int, count int);");
+            sql(@"IF NOT EXISTS ( select * from sysobjects where name='topic') CREATE TABLE
+topic (id_topic uniqueidentifier PRIMARY KEY, name NVARCHAR(50), time int, id_course uniqueidentifier FOREIGNKEY REFERENCES course(id_course), count int);");
 
             //создаем таблицу "вопрос", если она не существует
-            sql("CREATE TABLE IF NOT EXISTS question (id_que int AUTO_INCREMENT PRIMARY KEY, text VARCHAR(255), type VARCHAR(3), count int, id_topic int);");
+            sql(@"IF NOT EXISTS ( select * from sysobjects where name='question')
+CREATE TABLE question (id_que uniqueidentifier PRIMARY KEY, text NVARCHAR(255), type NVARCHAR(3), count int, id_topic uniqueidentifier FOREIGNKEY REFERENCES topic(id_topic));");
 
             //создаем таблицу "ответ", если она не существует
-            sql("CREATE TABLE IF NOT EXISTS answer (id_answ int AUTO_INCREMENT PRIMARY KEY, text VARCHAR(255), id_que int, point int);");
+            sql(@"IF NOT EXISTS ( select * from sysobjects where name='answer') CREATE TABLE
+answer (id_answ uniqueidentifier PRIMARY KEY, text NVARCHAR(255), id_que uniqueidentifier FOREIGNKEY REFERENCES question(id_que), point int);");
 
-            sql("CREATE TABLE IF NOT EXISTS coordinates (id_coord int AUTO_INCREMENT PRIMARY KEY, axisX VARCHAR(255), axisY VARCHAR(255),  type VARCHAR(20), points int, id_que int);");
+            sql(@"IF NOT EXISTS ( select * from sysobjects where name='coordinates') CREATE TABLE
+coordinates (id_coord uniqueidentifier PRIMARY KEY, axisX NVARCHAR(255), axisY NVARCHAR(255),  type NVARCHAR(20), points int, id_que uniqueidentifier FOREIGNKEY REFERENCES question(id_que));");
 
-            sql("CREATE TABLE IF NOT EXISTS result (id_result int AUTO_INCREMENT PRIMARY KEY, id_course int, id_topic int, id_user int, points int, date DATE, time TIME);");
+            sql(@"IF NOT EXISTS ( select * from sysobjects where name='result')  
+CREATE TABLE result (id_result uniqueidentifier PRIMARY KEY, id_course uniqueidentifier FOREIGNKEY REFERENCES course(id_course), 
+id_topic uniqueidentifier FOREIGNKEY REFERENCES topic(id_topic) int, id_user uniqueidentifier REFERENCES t_user(id_user), points int, date DATE, time TIME);");
         }
 
     }
