@@ -22,6 +22,7 @@ namespace ControlSystemServer
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
           //  services.Configure<string>(options=>Configuration.GetValue<string>("ConnectionString"));
             services.AddSingleton<IUserService, UserService>();
+            services.AddSingleton<ICourseService, CourseService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

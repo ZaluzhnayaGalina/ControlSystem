@@ -8,7 +8,8 @@ namespace ControlSystemServer.Services
     {
         List<User> GetUsers();
         User GetUser(Guid id);
-        void PutUser(User user);
+        void CreateUser(User user);
+        void ChangeUser(User user);
         bool Check(string userName, string passwordSalt);
     }
 }

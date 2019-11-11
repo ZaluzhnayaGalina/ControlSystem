@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace ControlSystem.Model
 {
@@ -6,5 +7,6 @@ namespace ControlSystem.Model
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
+       // public List<Question> Questions {get;set;}
     }
 }

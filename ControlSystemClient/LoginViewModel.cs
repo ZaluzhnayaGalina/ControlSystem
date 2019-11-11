@@ -51,7 +51,7 @@ namespace ControlSystemClient
         private HttpClient NewHttpClient()
         {
             var client = new HttpClient();
-            client.BaseAddress = new Uri(@"http://localhost:53363/");
+            client.BaseAddress = new Uri(@"http://localhost/ControlSystem/web/");
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             return client;

@@ -86,7 +86,7 @@ namespace ControlSystemServer.Services
             return users;
         }
 
-        public void PutUser(User user)
+        public void CreateUser(User user)
         {
             if (user.ID == Guid.Empty)
                 user.ID = Guid.NewGuid();
@@ -106,6 +106,29 @@ namespace ControlSystemServer.Services
                     transaction.Commit();
                 }
                 catch(Exception e)
+                {
+                    transaction.Rollback();
+                }
+            }
+        }
+
+        public void ChangeUser(User user)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                var transaction = connection.BeginTransaction();
+                var command = new SqlCommand("Update Users set Name=@Name, Role=@Role where ID=@ID", connection, transaction);
+                command.Parameters.AddWithValue("ID", user.ID);
+                command.Parameters.AddWithValue("Name", user.Name);
+                command.Parameters.AddWithValue("Role", user.Role);
+
+                try
+                {
+                    command.ExecuteNonQuery();
+                    transaction.Commit();
+                }
+                catch (Exception e)
                 {
                     transaction.Rollback();
                 }
