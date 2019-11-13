@@ -34,15 +34,12 @@ namespace ControlSystemClient
             var hashSalt = GetSalt(password);
             using (var client = NewHttpClient())
             {
-                var response = await client.GetAsync($"api/user/byName?name={Login}&passwordSalt={hashSalt}");
+                var response = await client.GetAsync($"api/user/auth?login={Login}&passwordSalt={hashSalt}");
                 if (response.IsSuccessStatusCode)
                 {
-                   Success = await response.Content.ReadAsAsync<bool>();
-                    if (Success)
-                    {
-                        var window = values[1] as Window;
-                        window?.Close();
-                    }
+                    Session.Current.User = response.Content.ReadAsAsync<User>().GetAwaiter().GetResult();
+                    var window = values[1] as Window;
+                    window?.Close();
 
                 }
             }
@@ -63,8 +60,7 @@ namespace ControlSystemClient
             //создание хэша пароля
             string hash = BitConverter.ToString(shaM.ComputeHash(Encoding.UTF8.GetBytes(password)));
             //создание хэша от (хэш пароля + имя пользователя)
-            string hashSalt = BitConverter.ToString(shaM.ComputeHash(Encoding.UTF8.GetBytes(hash + Login)));
-            return hashSalt;
+            return hash;
         }
     }
 }

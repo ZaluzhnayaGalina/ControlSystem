@@ -10,7 +10,6 @@ namespace ControlSystemServer.Services
     {
         List<Course> GetCourses();
         Course GetCourse(Guid CourseID);
-        List<Topic> GetAllTopics();
         void CreateCourse(Course course);
         void ChangeCourse(Course course);
     }

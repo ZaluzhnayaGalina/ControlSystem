@@ -4,7 +4,7 @@ namespace ControlSystem.Model
 {
     public interface IEntity
     {
-        Guid ID { get; set; }
+        Guid Id { get; set; }
         StoreMode StoreMode { get; set; }
     }
 }

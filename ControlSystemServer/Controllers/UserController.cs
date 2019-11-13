@@ -21,10 +21,12 @@ namespace ControlSystemServer.Controllers
         {
             return _userService.GetUsers();
         }
-        [HttpGet("byName")]
-        public bool CheckUser(string name, string passwordSalt)
+        [HttpGet("auth")]
+        public User CheckUser(string login, string passwordSalt)
         {
-            return _userService.Check(name, passwordSalt);
+            if (_userService.Check(login, passwordSalt))
+                return _userService.GetUser(login);
+            else return null;
         }
         // GET: api/User/5
         [HttpGet("{id}", Name = "Get")]

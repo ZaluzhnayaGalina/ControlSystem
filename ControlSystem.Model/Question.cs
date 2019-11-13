@@ -10,7 +10,6 @@ namespace ControlSystem.Model
         public string Text { get; set; }
         public int Type { get; set; }
         public int Count { get; set; }
-        public Guid TopicId { get; set; }
-        public Topic Topic { get; set; }
+        public List<Answer> Answers { get; set; }
     }
 }

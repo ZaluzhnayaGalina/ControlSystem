@@ -13,15 +13,13 @@ namespace ControlSystemClient
             var lvm = new LoginViewModel();
             var loginForm = new LoginForm { DataContext = lvm };
             loginForm.ShowDialog();
-            if (lvm.Success)
+            if (Session.Current.User!=null)
             {
-                MessageBox.Show("Auth succeeded");
                 Current.ShutdownMode = ShutdownMode.OnMainWindowClose;
                 new MainWindow().Show();
             }
             else
             {
-                MessageBox.Show("Auth not succeded");
                 Current.Shutdown();
             }
         }

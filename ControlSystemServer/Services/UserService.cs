@@ -14,13 +14,13 @@ namespace ControlSystemServer.Services
             _connectionString = configuration.GetConnectionString("DefaultConnectionString");
         }
 
-        public bool Check(string userName, string passwordSalt)
+        public bool Check(string login, string passwordSalt)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
-                var command = new SqlCommand("Select Name,Password from Users with(nolock) where Name=@Name", connection);
-                command.Parameters.AddWithValue("Name", userName);
+                var command = new SqlCommand("Select Login,Password from Users with(nolock) where Login=@Login", connection);
+                command.Parameters.AddWithValue("Login", login);
                 using (var reader = command.ExecuteReader())
                 {
                     if (reader.Read())
@@ -50,10 +50,9 @@ namespace ControlSystemServer.Services
                         user = new User()                        
                         {
                             ID = reader.GetGuid(0),
-                            Name = reader.GetString(1)
+                            Name = reader.GetString(1),
+                            Role = (Role)reader.GetInt32(2)
                         };
-                        var role = reader.GetValue(2);
-                        user.Role = role is null ? role.ToString() : string.Empty;
                     }
                 }
             }
@@ -74,11 +73,9 @@ namespace ControlSystemServer.Services
                         var user = new User
                         {
                             ID = reader.GetGuid(0),
-                            Name = reader.GetString(1)
-                        };
-                        var role = reader.GetValue(2);
-                        user.Role = role is null ? string.Empty : role.ToString();
-                        
+                            Name = reader.GetString(1),
+                            Role = (Role)reader.GetInt32(2)
+                        };                        
                         users.Add(user);
                     }
                 }
@@ -153,6 +150,30 @@ namespace ControlSystemServer.Services
                     transaction.Rollback();
                 }
             }
+        }
+
+        public User GetUser(string login)
+        {
+            User user = null;
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                var command = new SqlCommand("Select ID, Name, Role from users with(nolock) where Login=@Login", connection);
+                command.Parameters.AddWithValue("Login", login);
+                using (var reader = command.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        user = new User()
+                        {
+                            ID = reader.GetGuid(0),
+                            Name = reader.GetString(1),
+                            Role = (Role)reader.GetInt32(2)
+                        };
+                    }
+                }
+            }
+            return user;
         }
     }
 }
