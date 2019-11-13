@@ -134,5 +134,25 @@ namespace ControlSystemServer.Services
                 }
             }
         }
+
+        public void DeleteUser(Guid userId)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                var transaction = connection.BeginTransaction();
+                var command = new SqlCommand("Delete from Users where ID=@ID", connection, transaction);
+                command.Parameters.AddWithValue("ID", userId);
+                try
+                {
+                    command.ExecuteNonQuery();
+                    transaction.Commit();
+                }
+                catch (Exception e)
+                {
+                    transaction.Rollback();
+                }
+            }
+        }
     }
 }

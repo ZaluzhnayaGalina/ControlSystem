@@ -11,5 +11,6 @@ namespace ControlSystemServer.Services
         void CreateUser(User user);
         void ChangeUser(User user);
         bool Check(string userName, string passwordSalt);
+        void DeleteUser(Guid userId);
     }
 }

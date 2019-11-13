@@ -51,8 +51,9 @@ namespace ControlSystemServer.Controllers
 
         // DELETE: api/ApiWithActions/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public void Delete(Guid id)
         {
+            _userService.DeleteUser(id);
         }
     }
 }
